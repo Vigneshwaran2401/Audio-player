@@ -11,6 +11,12 @@
   .card {
     background-color: #A239CA;
   }
+
+  #songList a.active {
+    color: red;
+    /* Add any other desired styling */
+  }
+  
   
   @media (max-width: 576px) {
     /* Customize styles for mobile devices */

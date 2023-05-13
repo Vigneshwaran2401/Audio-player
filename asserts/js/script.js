@@ -184,21 +184,6 @@ audioPlayer.addEventListener("timeupdate", () => {
   }
 });
 
-// Function to update the progress bar and current time
-function updateProgress() {
-  const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-  progressBar.style.width = `${progress}%`;
-  currentTime.textContent = formatTime(audioPlayer.currentTime);
-}
-
-// Event listener for time update to update the progress bar and current time
-audioPlayer.addEventListener("timeupdate", updateProgress);
-
-// Event listener for audio player events
-audioPlayer.addEventListener("ended", () => {
-  playNextSong();
-});
-
 // Function to handle swipe gestures
 function handleGesture(gesture) {
   if (gesture === "swipeLeft") {
@@ -232,6 +217,19 @@ document.addEventListener("touchend", (event) => {
     }
   }
 });
+
+// Function to update the active song in the song list
+function updateActiveSong() {
+  const songLinks = document.querySelectorAll('#songList a');
+  songLinks.forEach((link, index) => {
+    if (index === currentSongIndex) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+}
+
 
 // Initialize the song list
 renderSongList();
