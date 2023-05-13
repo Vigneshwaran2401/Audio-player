@@ -55,15 +55,27 @@ function pauseAudio() {
 // Event listener for play/pause button click
 playPauseBtn.addEventListener("click", togglePlayPause);
 
-// Function to update the progress bar
-function updateProgressBar() {
+// Function to update the progress bar and current time
+function updateProgress() {
   const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
   progressBar.style.width = `${progress}%`;
   currentTime.textContent = formatTime(audioPlayer.currentTime);
 }
 
-// Event listener for time update to update the progress bar
-audioPlayer.addEventListener("timeupdate", updateProgressBar);
+// Event listener for time update to update the progress bar and current time
+audioPlayer.addEventListener("timeupdate", updateProgress);
+
+// Function to update the progress bar and current time when clicking on the progress bar
+function seekToTime(event) {
+  const progressBarWidth = progressBar.clientWidth;
+  const clickX = event.offsetX;
+  const seekPercentage = (clickX / progressBarWidth) * 100;
+  const seekTime = (seekPercentage / 100) * audioPlayer.duration;
+  audioPlayer.currentTime = seekTime;
+}
+
+// Event listener for clicking on the progress bar
+progressBar.addEventListener("click", seekToTime);
 
 // Event listener for file input change to handle song uploads
 document.getElementById("songInput").addEventListener("change", (event) => {
@@ -85,7 +97,7 @@ function renderSongList() {
 
   songs.forEach((song, index) => {
     const li = document.createElement('li');
-    const a = document.createElement('a');
+    const a =     document.createElement('a');
     a.href = '#';
     a.textContent = song.name;
     a.setAttribute('data-index', index);
@@ -104,88 +116,123 @@ function playSong(index) {
   }
 }
 
-  // Function to update the active song in the song list
-  function updateActiveSong() {
-    const songLinks = document.querySelectorAll('#songList a');
-    songLinks.forEach((link) => {
-      link.classList.remove('active');
-    });
-    songLinks[currentSongIndex].classList.add('active');
-  }
-
-  // Function to play the previous song
-  function playPreviousSong() {
-    currentSongIndex--;
-    if (currentSongIndex < 0) {
-      currentSongIndex = songs.length - 1;
-    }
-    initializePlayer();
-    playAudio();
-    updateActiveSong();
-  }
-
-  // Function to play the next song
-  function playNextSong() {
-    currentSongIndex++;
-    if (currentSongIndex >= songs.length) {
-      currentSongIndex = 0;
-    }
-    initializePlayer();
-    playAudio();
-    updateActiveSong();
-  }
-
-  // Event listener for previous button click
-  previousBtn.addEventListener("click", playPreviousSong);
-
-  // Event listener for next button click
-  nextBtn.addEventListener("click", playNextSong);
-
-  // Load songs from local storage
-  const storedSongs = localStorage.getItem("songs");
-  if (storedSongs) {
-    songs = JSON.parse(storedSongs);
-    renderSongList();
-  }
-
-  // Event listener for song list item click
-  songList.addEventListener('click', (event) => {
-    if (event.target.tagName === 'A') {
-      const index = parseInt(event.target.getAttribute('data-index'));
-      playSong(index);
-    }
+// Function to update the active song in the song list
+function updateActiveSong() {
+  const songLinks = document.querySelectorAll('#songList a');
+  songLinks.forEach((link) => {
+    link.classList.remove('active');
   });
+  songLinks[currentSongIndex].classList.add('active');
+}
 
-  // Function to update the logo rotation
-  function updateLogoRotation() {
-    const logo = document.getElementById("logo");
-    const rotation = (audioPlayer.currentTime / audioPlayer.duration) * 360;
-    logo.style.transform = `rotate(${rotation}deg)`;
+// Function to play the previous song
+function playPreviousSong() {
+  currentSongIndex--;
+  if (currentSongIndex < 0) {
+    currentSongIndex = songs.length - 1;
   }
+  initializePlayer();
+  playAudio();
+  updateActiveSong();
+}
 
-  // Event listener for time update to update the progress bar, logo rotation, and check for song end
-  audioPlayer.addEventListener("timeupdate", () => {
-    updateProgressBar();
-    updateLogoRotation();
-    if (audioPlayer.currentTime === audioPlayer.duration) {
-      playNextSong();
-    }
-  });
-
-  // Function to update the progress bar and current time
-  function updateProgress() {
-    const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-    progressBar.style.width = `${progress}%`;
-    currentTime.textContent = formatTime(audioPlayer.currentTime);
+// Function to play the next song
+function playNextSong() {
+  currentSongIndex++;
+  if (currentSongIndex >= songs.length) {
+    currentSongIndex = 0;
   }
+  initializePlayer();
+  playAudio();
+  updateActiveSong();
+}
 
-  // Event listener for time update to update the progress bar and current time
-  audioPlayer.addEventListener("timeupdate", updateProgress);
+// Event listener for previous button click
+previousBtn.addEventListener("click", playPreviousSong);
 
-  // Event listener for audio player events
-  audioPlayer.addEventListener("ended", () => {
-    playNextSong();
-  });
+// Event listener for next button click
+nextBtn.addEventListener("click", playNextSong);
 
-  // Initialize the song list
+// Load songs from local storage
+const storedSongs = localStorage.getItem("songs");
+if (storedSongs) {
+  songs = JSON.parse(storedSongs);
   renderSongList();
+}
+
+// Event listener for song list item click
+songList.addEventListener('click', (event) => {
+  if (event.target.tagName === 'A') {
+    const index = parseInt(event.target.getAttribute('data-index'));
+    playSong(index);
+  }
+});
+
+// Function to update the logo rotation
+function updateLogoRotation() {
+  const logo = document.getElementById("logo");
+  const rotation = (audioPlayer.currentTime / audioPlayer.duration) * 360;
+  logo.style.transform = `rotate(${rotation}deg)`;
+}
+
+// Event listener for time update to update the progress bar, logo rotation, and check for song end
+audioPlayer.addEventListener("timeupdate", () => {
+  updateProgress();
+  updateLogoRotation();
+  if (audioPlayer.currentTime === audioPlayer.duration) {
+    playNextSong();
+  }
+});
+
+// Function to update the progress bar and current time
+function updateProgress() {
+  const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+  progressBar.style.width = `${progress}%`;
+  currentTime.textContent = formatTime(audioPlayer.currentTime);
+}
+
+// Event listener for time update to update the progress bar and current time
+audioPlayer.addEventListener("timeupdate", updateProgress);
+
+// Event listener for audio player events
+audioPlayer.addEventListener("ended", () => {
+  playNextSong();
+});
+
+// Function to handle swipe gestures
+function handleGesture(gesture) {
+  if (gesture === "swipeLeft") {
+    playNextSong();
+  } else if (gesture === "swipeRight") {
+    playPreviousSong();
+  }
+}
+
+// Add event listeners for swipe gestures
+let initialX = null;
+let initialY = null;
+
+document.addEventListener("touchstart", (event) => {
+  initialX = event.touches[0].clientX;
+  initialY = event.touches[0].clientY;
+});
+
+document.addEventListener("touchend", (event) => {
+  const finalX = event.changedTouches[0].clientX;
+  const finalY = event.changedTouches[0].clientY;
+
+  const dx = finalX - initialX;
+  const dy = finalY -initialY;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 0) {
+      handleGesture("swipeRight");
+    } else {
+      handleGesture("swipeLeft");
+    }
+  }
+});
+
+// Initialize the song list
+renderSongList();
+

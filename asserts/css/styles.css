@@ -65,6 +65,7 @@
   
   nav {
     text-align: center;
+    background-color: #4717F6;
   }
   
   nav .navbar-nav {
@@ -81,3 +82,6 @@
     color: #E7DFDD;
   }
   
+  a:hover {
+    color: #0E0B16;
+  }
